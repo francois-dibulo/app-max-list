@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Expenses</title>
+</head>
+<body>
+
+  <table id="item-list">
+    <tr class="head">
+      <td>Item</td>
+      {% for user in users %}
+        <td>
+          {{ user.email }}
+        </td>
+      {% endfor %}
+    </tr>
+
+    {% for item in items %}
+      <tr>
+        <td>
+          {{ item.label }}
+        </td>
+        {% for user in users %}
+          <td>
+            0
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+
+  </table>
+
+  <div>
+    <input type="text" id="item_label">
+    <button class="btn_item_add">Add item</button>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript">
+
+    var ListRenderer = function() {
+      this.item_list_ele = $("#item-list");
+      this.users = [];
+      this.items = [];
+    }
+
+    ListRenderer.prototype = {
+
+      renderHead: function() {
+        var head_ele = this.item_list_ele.find('.head');
+
+        var td_ele = $("<td>Items</td>");
+        head_ele.append(td_ele);
+        for (var i = 0; i < this.users.length; i++) {
+          var user = this.users[i];
+          var index = user.email.indexOf("@");
+          var name = user.email.substr(0, index);
+          var td_ele = $("<td>" + name + "</td>");
+          head_ele.append(td_ele);
+        }
+      },
+
+      setUsers: function(users) {
+        this.users = users;
+        this.renderHead();
+      },
+
+      loadUsers: function() {
+        var self = this;
+        jQuery.get("users", function(users) {
+          self.setUsers(JSON.parse(users));
+        });
+      },
+
+      loadItems: function() {
+
+      },
+
+      addItem: function(label) {
+        $.ajax({
+          type: "POST",
+          url: "items",
+          data: { label: label },
+          success: function(response) {
+            console.log(response);
+          },
+          dataType: 'json'
+        });
+      }
+
+    };
+
+    var list_renderer = new ListRenderer();
+
+    $(".btn_item_add").on("click", function() {
+      var label = $("#item_label").val();
+      list_renderer.addItem(label);
+    });
+
+  </script>
+
+</body>
+</html>
